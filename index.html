@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EditoFam - Video Sharing Platform</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --background: #0f172a;
+            --foreground: #f1f5f9;
+            --surface: #1e293b;
+            --surface-secondary: #334155;
+            --muted: #94a3b8;
+            --border: #475569;
+            --primary: #60a5fa;
+            --error: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1rem;
+        }
+
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: var(--foreground);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button, a.button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+
+        button:hover, a.button:hover {
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background-color: var(--error);
+        }
+
+        .profile-btn {
+            background-color: var(--surface);
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+
+        .glass {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .warning-banner {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1rem;
+            display: none;
+        }
+
+        .warning-banner.show {
+            display: block;
+        }
+
+        .warning-content {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .warning-icon {
+            font-size: 1.5rem;
+        }
+
+        .warning-text p {
+            margin: 0;
+            color: var(--foreground);
+        }
+
+        .warning-text p:first-child {
+            font-weight: 600;
+        }
+
+        .warning-text p:last-child {
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        main {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .video-card {
+            background-color: var(--surface);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, var(--surface-secondary), var(--surface));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .play-icon {
+            position: absolute;
+            width: 3rem;
+            height: 3rem;
+            background-color: rgba(96, 165, 250, 0.8);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-caption {
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 6rem;
+            padding-bottom: 6rem;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3.75rem;
+        }
+
+        .empty-state h2 {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: var(--foreground);
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            max-width: 28rem;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 4rem;
+            height: 4rem;
+            background-color: var(--primary);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #g_id_onload {
+            display: flex;
+            justify-content: center;
+        }
+
+        .g_id_signin {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>EditoFam</h1>
+            <div class="auth-buttons">
+                <div id="loginSection">
+                    <div id="g_id_onload"
+                         data-client_id="569835091552-pe3kvkm1qh1au4io90usts0t8h3j7600.apps.googleusercontent.com"
+                         data-callback="handleCredentialResponse">
+                    </div>
+                    <div class="g_id_signin" data-type="standard"></div>
+                </div>
+                <div id="authSection" class="hidden">
+                    <a href="profile.html" class="button profile-btn">👤 <span id="userName">User</span></a>
+                    <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Warning Banner -->
+    <div id="warningBanner" class="warning-banner show">
+        <div class="glass">
+            <div class="warning-content">
+                <div class="warning-icon">⏰</div>
+                <div class="warning-text">
+                    <p>Guest uploads expire in 30 days</p>
+                    <p>Log in with Google to keep your videos permanently</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <div id="videoGrid" class="video-grid"></div>
+        
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <h2>No videos yet</h2>
+            <p>Be the first to share your moment in crystal clear quality</p>
+            <a href="upload.html" class="button">Upload Video</a>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <a href="upload.html" class="fab">+</a>
+
+    <script>
+        const BACKEND_URL = 'https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer';
+
+        function handleCredentialResponse(response) {
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            
+            const userData = JSON.parse(jsonPayload);
+            
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('userName', userData.name);
+            localStorage.setItem('userEmail', userData.email);
+            localStorage.setItem('userPicture', userData.picture);
+            
+            updateAuthUI();
+        }
+
+        function handleLogout() {
+            google.accounts.id.disableAutoSelect();
+            localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPicture');
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+            const userName = localStorage.getItem('userName') || 'User';
+            
+            const loginSection = document.getElementById('loginSection');
+            const authSection = document.getElementById('authSection');
+            const warningBanner = document.getElementById('warningBanner');
+            const userNameSpan = document.getElementById('userName');
+
+            if (isAuthenticated) {
+                loginSection.classList.add('hidden');
+                authSection.classList.remove('hidden');
+                warningBanner.classList.remove('show');
+                userNameSpan.textContent = userName;
+            } else {
+                loginSection.classList.remove('hidden');
+                authSection.classList.add('hidden');
+                warningBanner.classList.add('show');
+            }
+
+            loadVideos();
+        }
+
+        async function loadVideos() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/videos`);
+                const videos = await response.json();
+                
+                const videoGrid = document.getElementById('videoGrid');
+                const emptyState = document.getElementById('emptyState');
+
+                videoGrid.innerHTML = '';
+
+                if (videos.length === 0) {
+                    emptyState.style.display = 'flex';
+                } else {
+                    emptyState.style.display = 'none';
+                    videos.forEach((video) => {
+                        const videoCard = document.createElement('div');
+                        videoCard.className = 'video-card';
+                        videoCard.onclick = () => {
+                            localStorage.setItem('selectedVideoId', video.id);
+                            window.location.href = 'video-detail.html';
+                        };
+                        
+                        videoCard.innerHTML = `
+                            <div class="video-thumbnail">
+                                🎬
+                                <div class="play-icon">▶</div>
+                            </div>
+                            <div class="video-info">
+                                <div class="video-title">${video.title}</div>
+                                <div class="video-caption">${video.caption || 'No caption'}</div>
+                                <div class="video-stats">
+                                    <span>👁️ ${video.views} views</span>
+                                    <span>❤️ ${video.likes} likes</span>
+                                </div>
+                            </div>
+                        `;
+                        videoGrid.appendChild(videoCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+            google.accounts.id.renderButton(
+                document.querySelector('.g_id_signin'),
+                { 
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'signin_with'
+                }
+            );
+        });
+
+        window.addEventListener('beforeunload', function() {
+            google.accounts.id.cancel();
+        });
+    </script>
+</body>
+</html>

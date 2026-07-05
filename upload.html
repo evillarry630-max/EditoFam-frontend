@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - EditoFam</title>
+    <style>
+        :root {
+            --background: #0f172a;
+            --foreground: #f1f5f9;
+            --surface: #1e293b;
+            --surface-secondary: #334155;
+            --muted: #94a3b8;
+            --border: #475569;
+            --primary: #60a5fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1rem;
+        }
+
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 900;
+        }
+
+        a.back-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--surface);
+            color: var(--foreground);
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            display: inline-block;
+        }
+
+        main {
+            max-width: 42rem;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--muted);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            color: var(--foreground);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--primary);
+            border-radius: 0.5rem;
+            padding: 3rem 1rem;
+            text-align: center;
+            background-color: var(--surface);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .upload-box:hover {
+            background-color: var(--surface-secondary);
+        }
+
+        .upload-icon {
+            font-size: 3.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-box p {
+            margin: 0.5rem 0;
+        }
+
+        .upload-box p:first-of-type {
+            color: var(--foreground);
+            font-weight: 600;
+        }
+
+        .upload-box p:last-of-type {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            color: var(--foreground);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .char-count {
+            color: var(--muted);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .glass {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .visibility-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .visibility-info h3 {
+            color: var(--foreground);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .visibility-info p {
+            color: var(--muted);
+            font-size: 0.875rem;
+            margin: 0.25rem 0 0 0;
+        }
+
+        .toggle-switch {
+            width: 3rem;
+            height: 1.5rem;
+            border-radius: 9999px;
+            background-color: var(--border);
+            transition: background-color 0.2s;
+        }
+
+        .toggle-switch.active {
+            background-color: var(--primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: var(--border);
+            border-radius: 9999px;
+            height: 0.5rem;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .progress-fill {
+            background-color: var(--primary);
+            height: 100%;
+            transition: width 0.2s;
+            width: 0%;
+        }
+
+        .progress-text {
+            color: var(--muted);
+            font-size: 0.875rem;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-direction: column;
+        }
+
+        button {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .upload-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .upload-btn:disabled {
+            background-color: var(--border);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cancel-btn {
+            border: 1px solid var(--border);
+            color: var(--foreground);
+            background-color: transparent;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .cancel-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #f87171;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>EditoFam</h1>
+            <a href="index.html" class="back-btn">← Back</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-title">
+            <h2>Upload</h2>
+            <p>Share your moment in crystal clear quality</p>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✅ Video uploaded successfully!
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            ❌ <span id="errorText">Upload failed</span>
+        </div>
+
+        <div class="form-section">
+            <label>Select Video</label>
+            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📹</div>
+                <p id="fileName">Tap to select video</p>
+                <p>Up to 500MB</p>
+            </div>
+            <input type="file" id="fileInput" accept="video/*" onchange="handleFileSelect(event)">
+        </div>
+
+        <div class="form-section">
+            <label for="caption">Caption (Optional)</label>
+            <textarea id="caption" placeholder="Add a caption..." maxlength="500" rows="4" oninput="updateCharCount()"></textarea>
+            <div class="char-count"><span id="charCount">0</span>/500 characters</div>
+        </div>
+
+        <div class="form-section">
+            <label>Visibility</label>
+            <button class="glass visibility-toggle" onclick="toggleVisibility()">
+                <div class="visibility-info">
+                    <h3 id="visibilityLabel">🌍 Public</h3>
+                    <p id="visibilityDesc">Anyone can find and watch</p>
+                </div>
+                <div class="toggle-switch active" id="toggleSwitch"></div>
+            </button>
+        </div>
+
+        <div id="progressSection" class="hidden">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text"><span id="progressPercent">0</span>% uploaded</div>
+        </div>
+
+        <div class="button-group">
+            <button class="upload-btn" id="uploadBtn" onclick="handleUpload()" disabled>Upload Video</button>
+            <a href="index.html" class="cancel-btn">Cancel</a>
+        </div>
+    </main>
+
+    <script>
+        const BACKEND_URL = 'https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer';
+        let isPublic = true;
+        let selectedFile = null;
+
+        function handleFileSelect(event) {
+            selectedFile = event.target.files[0];
+            const fileName = document.getElementById('fileName');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (selectedFile) {
+                fileName.textContent = selectedFile.name;
+                uploadBtn.disabled = false;
+            }
+        }
+
+        function updateCharCount() {
+            const caption = document.getElementById('caption');
+            document.getElementById('charCount').textContent = caption.value.length;
+        }
+
+        function toggleVisibility() {
+            isPublic = !isPublic;
+            const label = document.getElementById('visibilityLabel');
+            const desc = document.getElementById('visibilityDesc');
+            const toggle = document.getElementById('toggleSwitch');
+
+            if (isPublic) {
+                label.textContent = '🌍 Public';
+                desc.textContent = 'Anyone can find and watch';
+                toggle.classList.add('active');
+            } else {
+                label.textContent = '🔒 Private';
+                desc.textContent = 'Only accessible via direct link';
+                toggle.classList.remove('active');
+            }
+        }
+
+        async function handleUpload() {
+            if (!selectedFile) {
+                alert('Please select a video first');
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressSection = document.getElementById('progressSection');
+            const errorMessage = document.getElementById('errorMessage');
+            const caption = document.getElementById('caption').value;
+            const uploader = localStorage.getItem('userName') || 'Guest';
+            
+            uploadBtn.disabled = true;
+            progressSection.classList.remove('hidden');
+            errorMessage.classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('video', selectedFile);
+            formData.append('title', selectedFile.name);
+            formData.append('caption', caption);
+            formData.append('uploader', uploader);
+            formData.append('isPublic', isPublic);
+
+            try {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        document.getElementById('progressFill').style.width = percentComplete + '%';
+                        document.getElementById('progressPercent').textContent = percentComplete;
+                    }
+                });
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        
+                        // Show success message
+                        const successMsg = document.getElementById('successMessage');
+                        successMsg.classList.add('show');
+                        
+                        // Reset form
+                        setTimeout(() => {
+                            selectedFile = null;
+                            document.getElementById('fileInput').value = '';
+                            document.getElementById('fileName').textContent = 'Tap to select video';
+                            document.getElementById('caption').value = '';
+                            document.getElementById('charCount').textContent = '0';
+                            progressSection.classList.add('hidden');
+                            uploadBtn.disabled = true;
+                            successMsg.classList.remove('show');
+                            
+                            // Redirect to home
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                });
+
+                xhr.addEventListener('error', () => {
+                    const errorMsg = document.getElementById('errorMessage');
+                    document.getElementById('errorText').textContent = 'Upload failed. Please try again.';
+                    errorMsg.classList.add('show');
+                    uploadBtn.disabled = false;
+                    progressSection.classList.add('hidden');
+                });
+
+                xhr.open('POST', `${BACKEND_URL}/api/videos/upload`);
+                xhr.send(formData);
+            } catch (error) {
+                const errorMsg = document.getElementById('errorMessage');
+                document.getElementById('errorText').textContent = error.message;
+                errorMsg.classList.add('show');
+                uploadBtn.disabled = false;
+                progressSection.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

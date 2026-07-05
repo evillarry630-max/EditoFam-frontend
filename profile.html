@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - EditoFam</title>
+    <style>
+        :root {
+            --background: #0f172a;
+            --foreground: #f1f5f9;
+            --surface: #1e293b;
+            --surface-secondary: #334155;
+            --muted: #94a3b8;
+            --border: #475569;
+            --primary: #60a5fa;
+            --error: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1rem;
+        }
+
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 900;
+        }
+
+        a.back-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--surface);
+            color: var(--foreground);
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            display: inline-block;
+        }
+
+        .profile-header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 1rem;
+        }
+
+        .profile-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 5rem;
+            height: 5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .profile-info h2 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--foreground);
+        }
+
+        .profile-info p {
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        .logout-btn {
+            width: 100%;
+            border: 1px solid var(--error);
+            color: var(--error);
+            font-weight: bold;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: transparent;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(248, 113, 113, 0.1);
+        }
+
+        main {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .video-card {
+            background-color: var(--surface);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, var(--surface-secondary), var(--surface));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .play-icon {
+            position: absolute;
+            width: 3rem;
+            height: 3rem;
+            background-color: rgba(96, 165, 250, 0.8);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-caption {
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 6rem;
+            padding-bottom: 6rem;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3.75rem;
+        }
+
+        .empty-state h2 {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: var(--foreground);
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            max-width: 28rem;
+        }
+
+        a.button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>EditoFam</h1>
+            <a href="index.html" class="back-btn">← Home</a>
+        </div>
+    </header>
+
+    <div class="profile-header">
+        <div class="profile-content">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-info">
+                <h2 id="userName">User</h2>
+                <p id="videoCount">0 videos uploaded</p>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+    </div>
+
+    <main>
+        <div id="videoGrid" class="video-grid"></div>
+        
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <h2>No videos yet</h2>
+            <p>Upload your first video to get started</p>
+            <a href="upload.html" class="button">Upload Video</a>
+        </div>
+    </main>
+
+    <script>
+        const BACKEND_URL = 'https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer';
+        
+        function handleLogout() {
+            localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPicture');
+            window.location.href = 'index.html';
+        }
+
+        function loadProfile() {
+            const userName = localStorage.getItem('userName') || 'User';
+            document.getElementById('userName').textContent = userName;
+            
+            loadUserVideos();
+        }
+
+        function loadUserVideos() {
+            const userName = localStorage.getItem('userName') || 'Guest';
+            const videos = JSON.parse(localStorage.getItem('editofam_videos') || '[]');
+            
+            // Filter videos by current user
+            const userVideos = videos.filter(v => v.uploader === userName);
+            
+            const videoGrid = document.getElementById('videoGrid');
+            const emptyState = document.getElementById('emptyState');
+            const videoCount = document.getElementById('videoCount');
+
+            videoGrid.innerHTML = '';
+            videoCount.textContent = `${userVideos.length} video${userVideos.length !== 1 ? 's' : ''} uploaded`;
+
+            if (userVideos.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+                userVideos.forEach((video, index) => {
+                    // Find the actual index in the full videos array
+                    const actualIndex = videos.indexOf(video);
+                    
+                    const videoCard = document.createElement('div');
+                    videoCard.className = 'video-card';
+                    videoCard.onclick = () => {
+                        localStorage.setItem('selectedVideoIndex', actualIndex);
+                        window.location.href = 'video-detail.html';
+                    };
+                    
+                    videoCard.innerHTML = `
+                        <div class="video-thumbnail">
+                            ${video.thumbnail}
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">${video.title}</div>
+                            <div class="video-caption">${video.caption || 'No caption'}</div>
+                            <div class="video-stats">
+                                <span>👁️ ${video.views} views</span>
+                                <span>❤️ ${video.likes} likes</span>
+                            </div>
+                        </div>
+                    `;
+                    videoGrid.appendChild(videoCard);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>
