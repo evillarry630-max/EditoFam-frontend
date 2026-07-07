@@ -1,0 +1,14 @@
+{
+  "name": "editofam-frontend",
+  "version": "1.0.0",
+  "description": "EditoFam - Video Sharing Platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 3000",
+    "build": "echo 'Static site - no build needed'",
+    "start": "python3 -m http.server 3000"
+  },
+  "keywords": ["video", "sharing", "editofam"],
+  "author": "EditoFam",
+  "license": "MIT"
+}
