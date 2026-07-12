@@ -168,7 +168,7 @@
           return;
         }
         
-        const response = await fetch(`https://editofam-backend.onrender.com/api/videos/${videoId}`);
+        const response = await fetch(`https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer/api/videos/${videoId}`);
         if (!response.ok) throw new Error('Video not found');
         
         const video = await response.json();
@@ -176,7 +176,7 @@
         // Update OG meta tags dynamically
         updateMetaTags(video);
         
-        const videoUrl = `https://editofam-backend.onrender.com${video.filePath}`;
+        const videoUrl = `https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer${video.filePath}`;
         
         document.getElementById('content').innerHTML = `
           <div class="video-player">
@@ -211,7 +211,7 @@
       const title = video.title || 'EditoFam Video';
       const description = video.caption || 'Watch this video on EditoFam';
       const videoUrl = `https://editofam.vercel.app/video.html?id=${video.id}`;
-      const thumbnailUrl = `https://editofam-backend.onrender.com/api/videos/${video.id}/thumbnail`;
+      const thumbnailUrl = `https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer/api/videos/${video.id}/thumbnail`;
       
       // Update title
       document.title = title + ' - EditoFam';
@@ -245,7 +245,7 @@
     async function likeVideo(videoId) {
       const userName = localStorage.getItem('userName') || 'Anonymous';
       try {
-        const response = await fetch(`https://editofam-backend.onrender.com/api/videos/${videoId}/like`, {
+        const response = await fetch(`https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer/api/videos/${videoId}/like`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userName })
