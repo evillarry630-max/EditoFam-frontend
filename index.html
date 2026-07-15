@@ -7,14 +7,18 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
-            --background: #0f172a;
+            --background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 50%, #0f172a 100%);
             --foreground: #f1f5f9;
-            --surface: #1e293b;
-            --surface-secondary: #334155;
-            --muted: #94a3b8;
-            --border: #475569;
+            --surface: rgba(30, 41, 59, 0.6);
+            --surface-secondary: rgba(51, 65, 85, 0.5);
+            --muted: #cbd5e1;
+            --border: rgba(148, 163, 184, 0.2);
             --primary: #60a5fa;
+            --primary-light: #93c5fd;
+            --accent: #a78bfa;
+            --accent-light: #ddd6fe;
             --error: #f87171;
+            --success: #34d399;
         }
 
         * {
@@ -24,10 +28,24 @@
         }
 
         html, body {
-            background-color: var(--background);
+            background: var(--background);
             color: var(--foreground);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         header {
@@ -35,9 +53,11 @@
             position: sticky;
             top: 0;
             z-index: 50;
-            background-color: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .header-content {
@@ -46,12 +66,18 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
+            z-index: 1;
         }
 
         h1 {
             font-size: 1.875rem;
             font-weight: 900;
-            color: var(--foreground);
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
         }
 
         .auth-buttons {
@@ -62,38 +88,58 @@
 
         button, a.button {
             padding: 0.75rem 1.5rem;
-            background-color: var(--primary);
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
             color: white;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             border: none;
             font-weight: 600;
             cursor: pointer;
             font-size: 1rem;
             text-decoration: none;
             display: inline-block;
-            transition: opacity 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
         }
 
         button:hover, a.button:hover {
-            opacity: 0.8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(96, 165, 250, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         .logout-btn {
-            background-color: var(--error);
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            box-shadow: 0 4px 15px rgba(248, 113, 113, 0.3);
+        }
+
+        .logout-btn:hover {
+            box-shadow: 0 6px 20px rgba(248, 113, 113, 0.5);
         }
 
         .profile-btn {
-            background-color: var(--surface);
+            background: rgba(96, 165, 250, 0.1);
             color: var(--foreground);
-            border: 1px solid var(--border);
+            border: 1.5px solid rgba(96, 165, 250, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-btn:hover {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: rgba(96, 165, 250, 0.5);
         }
 
         .glass {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.75rem;
-            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .warning-banner {
@@ -110,6 +156,11 @@
         .warning-content {
             display: flex;
             gap: 0.75rem;
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
         }
 
         .warning-icon {
@@ -135,63 +186,91 @@
             max-width: 80rem;
             margin: 0 auto;
             padding: 2rem 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
         .video-card {
-            background-color: var(--surface);
-            border-radius: 0.75rem;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 1rem;
             overflow: hidden;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(148, 163, 184, 0.2);
             cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .video-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
+            transform: translateY(-8px);
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(30, 41, 59, 0.6);
+            box-shadow: 0 12px 48px rgba(96, 165, 250, 0.2);
         }
 
         .video-thumbnail {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: linear-gradient(135deg, var(--surface-secondary), var(--surface));
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.3) 0%, rgba(167, 139, 250, 0.3) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
             position: relative;
+            overflow: hidden;
+        }
+
+        .video-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+            z-index: 1;
         }
 
         .play-icon {
             position: absolute;
-            width: 3rem;
-            height: 3rem;
-            background-color: rgba(96, 165, 250, 0.8);
+            width: 3.5rem;
+            height: 3.5rem;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%);
             border-radius: 9999px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
+            z-index: 2;
+            box-shadow: 0 8px 20px rgba(96, 165, 250, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover .play-icon {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(96, 165, 250, 0.6);
         }
 
         .video-info {
-            padding: 1rem;
+            padding: 1.25rem;
         }
 
         .video-title {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--foreground);
             margin-bottom: 0.5rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 1rem;
         }
 
         .video-caption {
@@ -223,13 +302,20 @@
         }
 
         .empty-icon {
-            font-size: 3.75rem;
+            font-size: 4rem;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .empty-state h2 {
             font-size: 1.875rem;
             font-weight: 900;
-            color: var(--foreground);
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .empty-state p {
@@ -243,198 +329,228 @@
             right: 2rem;
             width: 4rem;
             height: 4rem;
-            background-color: var(--primary);
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
             border-radius: 9999px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-size: 1.5rem;
-            font-weight: bold;
-            text-decoration: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(96, 165, 250, 0.4);
+            border: none;
+            z-index: 40;
         }
 
         .fab:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) translateY(-4px);
+            box-shadow: 0 12px 48px rgba(96, 165, 250, 0.6);
         }
 
-        .hidden {
-            display: none;
+        .fab:active {
+            transform: scale(0.95);
         }
 
-        #g_id_onload {
-            display: flex;
-            justify-content: center;
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
         }
 
-        .g_id_signin {
-            display: flex;
-            justify-content: center;
+        .spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid rgba(96, 165, 250, 0.3);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .fab {
+                width: 3.5rem;
+                height: 3.5rem;
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="header-content">
             <h1>EditoFam</h1>
             <div class="auth-buttons">
-                <div id="loginSection">
-                    <div id="g_id_onload"
-                         data-client_id="569835091552-pe3kvkm1qh1au4io90usts0t8h3j7600.apps.googleusercontent.com"
-                         data-callback="handleCredentialResponse">
-                    </div>
-                    <div class="g_id_signin" data-type="standard"></div>
-                </div>
-                <div id="authSection" class="hidden">
-                    <a href="profile.html" class="button profile-btn">👤 <span id="userName">User</span></a>
-                    <button class="logout-btn" onclick="handleLogout()">Log Out</button>
-                </div>
+                <button id="googleLoginBtn" onclick="handleGoogleLogin()">Sign in with Google</button>
+                <button class="profile-btn" id="profileBtn" style="display: none;" onclick="toggleProfileMenu()">👤 Profile</button>
+                <button class="logout-btn" id="logoutBtn" style="display: none;" onclick="logout()">Logout</button>
             </div>
         </div>
     </header>
 
-    <!-- Warning Banner -->
-    <div id="warningBanner" class="warning-banner show">
-        <div class="glass">
-            <div class="warning-content">
-                <div class="warning-icon">⏰</div>
-                <div class="warning-text">
-                    <p>Guest uploads expire in 30 days</p>
-                    <p>Log in with Google to keep your videos permanently</p>
-                </div>
+    <div class="warning-banner" id="warningBanner">
+        <div class="warning-content">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">
+                <p>Demo Mode</p>
+                <p>This is a demo platform. Videos are stored temporarily and may be deleted.</p>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
     <main>
-        <div id="videoGrid" class="video-grid"></div>
-        
-        <div id="emptyState" class="empty-state">
-            <div class="empty-icon">🎬</div>
-            <h2>No videos yet</h2>
-            <p>Be the first to share your moment in crystal clear quality</p>
-            <a href="upload.html" class="button">Upload Video</a>
+        <div id="videoContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem;">Loading videos...</p>
+            </div>
         </div>
     </main>
 
-    <!-- Floating Action Button -->
-    <a href="upload.html" class="fab">+</a>
+    <button class="fab" onclick="window.location.href='/upload.html'" title="Upload video">➕</button>
 
     <script>
         const BACKEND_URL = 'https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer';
 
-        function handleCredentialResponse(response) {
-            const base64Url = response.credential.split('.')[1];
+        function loadVideos() {
+            const xhr = new XMLHttpRequest();
+            xhr.timeout = 10000;
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const videos = JSON.parse(xhr.responseText);
+                        displayVideos(videos);
+                    } catch (e) {
+                        document.getElementById('videoContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h2>Error</h2><p>Failed to load videos</p></div>';
+                    }
+                }
+            };
+
+            xhr.onerror = function() {
+                document.getElementById('videoContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h2>Connection Error</h2><p>Unable to connect to server</p></div>';
+            };
+
+            xhr.ontimeout = function() {
+                document.getElementById('videoContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⏱️</div><h2>Timeout</h2><p>Request took too long</p></div>';
+            };
+
+            xhr.open('GET', BACKEND_URL + '/api/videos', true);
+            xhr.send();
+        }
+
+        function displayVideos(videos) {
+            if (videos.length === 0) {
+                document.getElementById('videoContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎬</div>
+                        <h2>No videos yet</h2>
+                        <p>Be the first to share a video on EditoFam!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = videos.map(video => `
+                <div class="video-card" onclick="window.location.href='/video.html?id=${video.id}'">
+                    <div class="video-thumbnail">
+                        <div class="play-icon">▶</div>
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">${escapeHtml(video.title || 'Untitled')}</div>
+                        <div class="video-caption">${escapeHtml(video.caption || '')}</div>
+                        <div class="video-stats">
+                            <span>❤️ ${video.likes || 0}</span>
+                            <span>👁️ ${video.views || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('videoContainer').innerHTML = `<div class="video-grid">${html}</div>`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function handleGoogleLogin() {
+            google.accounts.id.initialize({
+                client_id: '1006923825633-5fk5oj4u5gm0kqkfbqhkgqrr6c6p5c6p.apps.googleusercontent.com',
+                callback: onSignIn
+            });
+            google.accounts.id.renderButton(
+                document.getElementById('googleLoginBtn'),
+                { theme: 'dark', size: 'large' }
+            );
+            google.accounts.id.prompt();
+        }
+
+        function onSignIn(response) {
+            const token = response.credential;
+            const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            
-            const userData = JSON.parse(jsonPayload);
-            
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userName', userData.name);
-            localStorage.setItem('userEmail', userData.email);
-            localStorage.setItem('userPicture', userData.picture);
-            
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const data = JSON.parse(jsonPayload);
+            localStorage.setItem('userName', data.name);
+            localStorage.setItem('userEmail', data.email);
             updateAuthUI();
         }
 
-        function handleLogout() {
-            google.accounts.id.disableAutoSelect();
-            localStorage.removeItem('isAuthenticated');
+        function logout() {
             localStorage.removeItem('userName');
             localStorage.removeItem('userEmail');
-            localStorage.removeItem('userPicture');
             updateAuthUI();
         }
 
         function updateAuthUI() {
-            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-            const userName = localStorage.getItem('userName') || 'User';
-            
-            const loginSection = document.getElementById('loginSection');
-            const authSection = document.getElementById('authSection');
-            const warningBanner = document.getElementById('warningBanner');
-            const userNameSpan = document.getElementById('userName');
+            const userName = localStorage.getItem('userName');
+            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            const profileBtn = document.getElementById('profileBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
 
-            if (isAuthenticated) {
-                loginSection.classList.add('hidden');
-                authSection.classList.remove('hidden');
-                warningBanner.classList.remove('show');
-                userNameSpan.textContent = userName;
+            if (userName) {
+                googleLoginBtn.style.display = 'none';
+                profileBtn.style.display = 'block';
+                logoutBtn.style.display = 'block';
+                profileBtn.textContent = `👤 ${userName}`;
             } else {
-                loginSection.classList.remove('hidden');
-                authSection.classList.add('hidden');
-                warningBanner.classList.add('show');
-            }
-
-            loadVideos();
-        }
-
-        async function loadVideos() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/videos`);
-                const videos = await response.json();
-                
-                const videoGrid = document.getElementById('videoGrid');
-                const emptyState = document.getElementById('emptyState');
-
-                videoGrid.innerHTML = '';
-
-                if (videos.length === 0) {
-                    emptyState.style.display = 'flex';
-                } else {
-                    emptyState.style.display = 'none';
-                    videos.forEach((video) => {
-                        const videoCard = document.createElement('div');
-                        videoCard.className = 'video-card';
-                        videoCard.onclick = () => {
-                            window.location.href = 'video.html?id=' + video.id;
-                        };
-                        
-                        videoCard.innerHTML = `
-                            <div class="video-thumbnail">
-                                🎬
-                                <div class="play-icon">▶</div>
-                            </div>
-                            <div class="video-info">
-                                <div class="video-title">${video.title}</div>
-                                <div class="video-caption">${video.caption || 'No caption'}</div>
-                                <div class="video-stats">
-                                    <span>👁️ ${video.views} views</span>
-                                    <span>❤️ ${video.likes} likes</span>
-                                </div>
-                            </div>
-                        `;
-                        videoGrid.appendChild(videoCard);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading videos:', error);
+                googleLoginBtn.style.display = 'block';
+                profileBtn.style.display = 'none';
+                logoutBtn.style.display = 'none';
             }
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateAuthUI();
-            google.accounts.id.renderButton(
-                document.querySelector('.g_id_signin'),
-                { 
-                    theme: 'outline',
-                    size: 'large',
-                    text: 'signin_with'
-                }
-            );
-        });
+        function toggleProfileMenu() {
+            alert('Profile: ' + localStorage.getItem('userName'));
+        }
 
-        window.addEventListener('beforeunload', function() {
-            google.accounts.id.cancel();
-        });
+        // Show warning banner
+        document.getElementById('warningBanner').classList.add('show');
+
+        // Load videos on page load
+        loadVideos();
+
+        // Refresh videos every 30 seconds
+        setInterval(loadVideos, 30000);
+
+        // Update auth UI on page load
+        updateAuthUI();
     </script>
 </body>
 </html>
