@@ -171,97 +171,71 @@
   <script>
     const BACKEND_URL = 'https://4000-i1b1kqe9kgc2180a4jwf3-7c70c46e.sg1.manus.computer';
     
-    async function loadVideo() {
-      try {
-        const videoId = new URLSearchParams(window.location.search).get('id');
-        console.log('Loading video with ID:', videoId);
-        
-        if (!videoId) {
-          document.getElementById('content').innerHTML = '<div class="error">No video ID provided</div>';
-          return;
-        }
-        
-        console.log('Fetching from:', `${BACKEND_URL}/api/videos/${videoId}`);
-        
-        const response = await fetch(`${BACKEND_URL}/api/videos/${videoId}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
+    function loadVideo() {
+      const videoId = new URLSearchParams(window.location.search).get('id');
+      
+      if (!videoId) {
+        document.getElementById('content').innerHTML = '<div class="error">No video ID provided</div>';
+        return;
+      }
+      
+      // Use XMLHttpRequest instead of fetch to avoid hanging
+      const xhr = new XMLHttpRequest();
+      xhr.timeout = 5000; // 5 second timeout
+      
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            const video = JSON.parse(xhr.responseText);
+            displayVideo(video, videoId);
+          } catch (e) {
+            document.getElementById('content').innerHTML = '<div class="error">Error parsing video data</div>';
           }
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        } else {
+          document.getElementById('content').innerHTML = '<div class="error">Video not found (HTTP ' + xhr.status + ')</div>';
         }
+      };
+      
+      xhr.onerror = function() {
+        document.getElementById('content').innerHTML = '<div class="error">Error loading video - network error</div>';
+      };
+      
+      xhr.ontimeout = function() {
+        document.getElementById('content').innerHTML = '<div class="error">Error loading video - request timeout</div>';
+      };
+      
+      xhr.open('GET', BACKEND_URL + '/api/videos/' + videoId, true);
+      xhr.send();
+    }
+    
+    function displayVideo(video, videoId) {
+      const videoUrl = BACKEND_URL + video.filePath;
+      
+      document.getElementById('content').innerHTML = `
+        <div class="video-player">
+          <video controls>
+            <source src="${videoUrl}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
         
-        const video = await response.json();
-        console.log('Video data received:', video);
-        
-        // Update OG meta tags dynamically
-        updateMetaTags(video);
-        
-        const videoUrl = `${BACKEND_URL}${video.filePath}`;
-        console.log('Video URL:', videoUrl);
-        
-        document.getElementById('content').innerHTML = `
-          <div class="video-player">
-            <video controls>
-              <source src="${videoUrl}" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
+        <div class="video-info">
+          <div class="video-title">${escapeHtml(video.title || 'Untitled Video')}</div>
+          <div class="video-caption">${escapeHtml(video.caption || '')}</div>
+          
+          <div class="video-meta">
+            <span>👤 ${escapeHtml(video.uploader || 'Anonymous')}</span>
+            <span>❤️ ${video.likes || 0} likes</span>
+            <span>👁️ ${video.views || 0} views</span>
           </div>
           
-          <div class="video-info">
-            <div class="video-title">${escapeHtml(video.title || 'Untitled Video')}</div>
-            <div class="video-caption">${escapeHtml(video.caption || '')}</div>
-            
-            <div class="video-meta">
-              <span>👤 ${escapeHtml(video.uploader || 'Anonymous')}</span>
-              <span>❤️ ${video.likes || 0} likes</span>
-              <span>👁️ ${video.views || 0} views</span>
-            </div>
-            
-            <div class="video-actions">
-              <button class="action-btn" onclick="likeVideo('${videoId}')">❤️ Like</button>
-              <button class="action-btn" onclick="shareVideo('${videoId}')">📤 Share</button>
-              ${localStorage.getItem('userName') === '${escapeHtml(video.uploader || 'Anonymous')}' ? `<button class="action-btn delete-btn" onclick="deleteVideo('${videoId}')">🗑️ Delete</button>` : ''}
-            </div>
+          <div class="video-actions">
+            <button class="action-btn" onclick="likeVideo('${videoId}')">❤️ Like</button>
+            <button class="action-btn" onclick="shareVideo('${videoId}')">📤 Share</button>
+            ${localStorage.getItem('userName') === video.uploader ? `<button class="action-btn delete-btn" onclick="deleteVideo('${videoId}')">🗑️ Delete</button>` : ''}
           </div>
-        `;
-      } catch (error) {
-        console.error('Error loading video:', error);
-        document.getElementById('content').innerHTML = `<div class="error">Error loading video: ${error.message}</div>`;
-      }
-    }
-    
-    function updateMetaTags(video) {
-      const title = video.title || 'EditoFam Video';
-      const description = video.caption || 'Watch this video on EditoFam';
-      const videoUrl = `https://editofam.vercel.app/video.html?id=${video.id}`;
-      const thumbnailUrl = `${BACKEND_URL}/api/videos/${video.id}/thumbnail`;
-      
-      document.title = title + ' - EditoFam';
-      
-      updateMetaTag('og:title', title);
-      updateMetaTag('og:description', description);
-      updateMetaTag('og:image', thumbnailUrl);
-      updateMetaTag('og:url', videoUrl);
-      updateMetaTag('twitter:title', title);
-      updateMetaTag('twitter:description', description);
-      updateMetaTag('twitter:image', thumbnailUrl);
-    }
-    
-    function updateMetaTag(property, content) {
-      let tag = document.querySelector(`meta[property="${property}"]`);
-      if (!tag) {
-        tag = document.createElement('meta');
-        tag.setAttribute('property', property);
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute('content', content);
+        </div>
+      `;
     }
     
     function escapeHtml(text) {
@@ -270,25 +244,22 @@
       return div.innerHTML;
     }
     
-    async function likeVideo(videoId) {
+    function likeVideo(videoId) {
       const userName = localStorage.getItem('userName') || 'Anonymous';
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/videos/${videoId}/like`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userName })
-        });
-        if (response.ok) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', BACKEND_URL + '/api/videos/' + videoId + '/like', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status === 200) {
           alert('Video liked!');
           loadVideo();
         }
-      } catch (error) {
-        alert('Error liking video');
-      }
+      };
+      xhr.send(JSON.stringify({ userName: userName }));
     }
     
     function shareVideo(videoId) {
-      const url = `https://editofam.vercel.app/video.html?id=${videoId}`;
+      const url = 'https://editofam.vercel.app/video.html?id=' + videoId;
       if (navigator.share) {
         navigator.share({
           title: 'Check out this video on EditoFam',
@@ -300,30 +271,28 @@
       }
     }
     
-    async function deleteVideo(videoId) {
+    function deleteVideo(videoId) {
       if (!confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
         return;
       }
       
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/videos/${videoId}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userName: localStorage.getItem('userName') || 'Anonymous' })
-        });
-        
-        if (response.ok) {
+      const userName = localStorage.getItem('userName') || 'Anonymous';
+      const xhr = new XMLHttpRequest();
+      xhr.open('DELETE', BACKEND_URL + '/api/videos/' + videoId, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status === 200) {
           alert('Video deleted successfully!');
           window.location.href = 'index.html';
         } else {
           alert('Failed to delete video. You can only delete your own videos.');
         }
-      } catch (error) {
-        alert('Error deleting video: ' + error.message);
-      }
+      };
+      xhr.send(JSON.stringify({ userName: userName }));
     }
     
-    loadVideo();
+    // Load video when page loads
+    window.addEventListener('DOMContentLoaded', loadVideo);
   </script>
 </body>
 </html>
